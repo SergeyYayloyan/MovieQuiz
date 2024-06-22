@@ -62,21 +62,28 @@ extension StatisticService: StatisticServiceProtocol {
     
     func store(correct count: Int, total amount: Int) {
         let currentTotalCorrect = storage.integer(forKey: Keys.correct.rawValue)
-        let newTotalCorrect = currentTotalCorrect + count
-        storage.set(newTotalCorrect, forKey: Keys.correct.rawValue)
-                
-        var currentGamesCount = storage.integer(forKey: Keys.gamesCount.rawValue)
-        currentGamesCount += 1
-        storage.set(currentGamesCount, forKey: Keys.gamesCount.rawValue)
-                
-        let currentBestGame = bestGame
-        let newGame = GameResult(correct: count, total: amount, date: Date())
-                
-        if newGame.correct > currentBestGame.correct ||
-            (newGame.correct == currentBestGame.correct && newGame.date > currentBestGame.date) {
-            bestGame = newGame
-                }
+            let newTotalCorrect = currentTotalCorrect + count
+            storage.set(newTotalCorrect, forKey: Keys.correct.rawValue)
+                        
+            var currentGamesCount = storage.integer(forKey: Keys.gamesCount.rawValue)
+            if currentGamesCount == 0 {
+                currentGamesCount = 1
+                storage.set(currentGamesCount, forKey: Keys.gamesCount.rawValue)
+            } else {
+                currentGamesCount += 1
+                storage.set(currentGamesCount, forKey: Keys.gamesCount.rawValue)
+            }
+                        
+            let currentBestGame = bestGame
         
+            let newGame = GameResult(correct: count, total: amount, date: Date())
+                        
+            if newGame.correct > currentBestGame.correct ||
+                (newGame.correct == currentBestGame.correct && newGame.date > currentBestGame.date) {
+                bestGame = newGame
+            }
+            
             storage.synchronize()
     }
+    
 }

@@ -20,8 +20,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         let questionFactory = QuestionFactory()
         questionFactory.setup(delegate: self)
         self.questionFactory = questionFactory
-        statisticService = StatisticService() // ??
+        statisticService = StatisticService() 
         questionFactory.requestNextQuestion()
+        
     }
     
     // MARK: - QuestionFactoryDelegate
@@ -101,12 +102,16 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     private func showNextQuestionOrResults() {
         if currentQuestionIndex == questionsAmount - 1 {
+            statisticService.store(correct: correctAnswers, total: questionsAmount)
             
             let text = correctAnswers == questionsAmount ?
                        "Поздравляем, вы ответили на 10 из 10!" :
                        "Вы ответили на \(correctAnswers) из 10, попробуйте ещё раз!"
             
-            let gamesPlayed = statisticService.gamesCount
+            var gamesPlayed = statisticService.gamesCount
+            if gamesPlayed == 0 {
+                       gamesPlayed = 1
+                   }
             let bestGame = statisticService.bestGame
             let accuracy = statisticService.totalAccuracy
                     
@@ -121,7 +126,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
                        buttonText: "Сыграть ещё раз") { [weak self] in
                            self?.restartGame()
                    }
-            statisticService.store(correct: correctAnswers, total: questionsAmount)
             alertPresenter?.alertPresent(with: viewModel)
             
                } else {
@@ -130,9 +134,14 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             }
     }
     
+    private func resetUserDefaults() {
+        UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!) // Функция сброса алерта
+    }
+    
     private func restartGame() {
            currentQuestionIndex = 0
            correctAnswers = 0
+         //  resetUserDefaults() // Вызов функции сброса алерта
            questionFactory.requestNextQuestion()
     }
     
