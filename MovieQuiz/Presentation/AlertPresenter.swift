@@ -31,5 +31,4 @@ class AlertPresenter {
             
             presentingViewController?.present(alert, animated: true, completion: nil)
         }
-    
 }
